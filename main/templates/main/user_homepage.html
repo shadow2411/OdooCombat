@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Homepage - Library Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+<!-- Navbar -->
+<nav class="bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center">
+                <a href="#" class="flex-shrink-0">
+                    <img class="h-8 w-8" src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg" alt="Logo">
+                </a>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <div>
+                        <a href="{% url 'library' %}" class="text-white hover:bg-indigo-500 hover:bg-opacity-75 px-3 py-2 rounded-md text-sm font-medium">Browse Books</a>
+                        <a href="" class="text-white hover:bg-indigo-500 hover:bg-opacity-75 px-3 py-2 rounded-md text-sm font-medium">My Borrowed Books</a>
+                        <a href="{% url 'logout' %}" class="text-white hover:bg-red-500 hover:bg-opacity-75 px-3 py-2 rounded-md text-sm font-medium">Logout</a>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-8 text-center text-gray-800">Welcome, {{ user.username }}!</h1>
+        
+        <div class="flex flex-col md:flex-row gap-8">
+            <!-- Main content area (2/3 width on medium screens and above) -->
+            <div class="md:w-2/3">
+                <!-- Search bar -->
+                <div class="mb-8">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Search Books</h2>
+                    <form action="{% url 'search_books' %}" method="get" class="flex space-x-4">
+                        <input type="text" name="query" placeholder="Search for books..." class="flex-grow px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button type="submit" class="py-2 px-4 text-white bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg rounded-lg hover:bg-gradient-to-r hover:from-purple-700 hover:to-indigo-700">Search</button>
+                    </form>
+                </div>
+                
+                <!-- Borrowed books list -->
+                <div>
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">Your Borrowed Books</h2>
+                    {% if borrowed_books %}
+                        <ul class="space-y-4">
+                            {% for book in borrowed_books %}
+                                <li class="bg-white p-4 rounded-md shadow flex items-start space-x-4">
+                                    <img src="{{ book.book.thumbnail_url }}" alt="Book Cover" class="w-24 h-32 object-cover rounded-md shadow-md flex-shrink-0">
+                                    <div class="flex-grow">
+                                        <h3 class="font-semibold text-lg">{{ book.book.title }}</h3>
+                                        <p class="text-gray-600">Author: {{ book.book.authors }}</p>
+                                        <p class="text-gray-600">Borrowing Date: {{ book.borrow_date }}</p>
+                                        <p class="text-gray-600">Return Date: {{ book.due_date }}</p>
+                                    </div>
+                                    <!-- I want the below div to stick to the right -->
+                                     
+                                    <div class="flex-grow space-y-6">
+                                        <p>Your Fine is: Rs 500</p>
+                                        <form action="{% url 'return_book' book.book.title %}" method="POST" class="mt-auto">
+                                            {% csrf_token %}
+                                            <button class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">Return Book</button>
+                                        </form>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-gray-600">You haven't borrowed any books yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- User information sidebar (1/3 width on medium screens and above) -->
+            <div class="md:w-1/3">
+                <div class="bg-white p-6 rounded-md shadow">
+                    <h2 class="text-xl font-semibold mb-4 text-gray-700">User Information</h2>
+                    <div class="space-y-2">
+                        <p><strong>Username:</strong> {{ user.username }}</p>
+                        <p><strong>Email:</strong> {{ user.email }}</p>
+                        <p><strong>Member Since:</strong> {{ user.date_joined|date:"F j, Y" }}</p>
+                        <p><strong>Books Borrowed:</strong> {{ borrowed_books|length }}</p>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

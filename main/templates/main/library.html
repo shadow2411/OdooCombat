@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100">
+  <nav class="bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <div class="flex items-center">
+                <a href="#" class="flex-shrink-0">
+                    <img class="h-8 w-8" src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg" alt="Logo">
+                </a>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <div>
+                        <a href="{% url 'library' %}" class="text-white hover:bg-indigo-500 hover:bg-opacity-75 px-3 py-2 rounded-md text-sm font-medium">Browse Books</a>
+                        <a href="{% url 'user_home' %}" class="text-white hover:bg-indigo-500 hover:bg-opacity-75 px-3 py-2 rounded-md text-sm font-medium">My Borrowed Books</a>
+                        <a href="{% url 'logout' %}" class="text-white hover:bg-red-500 hover:bg-opacity-75 px-3 py-2 rounded-md text-sm font-medium">Logout</a>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</nav>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold mb-6">Public Library</h1>
+        <form method="GET" action="{% url 'library' %}" class="mb-6">
+            <div class="flex space-x-4">
+                <input type="text" name="query" value="{{ query }}" placeholder="Search books..." 
+                       class="flex-grow px-4 py-2 border rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="py-2 px-4 text-white bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg rounded-lg hover:bg-gradient-to-r hover:from-purple-700 hover:to-indigo-700">
+                    Search
+                </button>
+            </div>
+        </form>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-12">
+            {% for book in books %}
+            <div class="bg-white rounded-lg shadow-md overflow-hidden flex flex-col">
+                <img src="{{ book.thumbnail_url }}" 
+                     alt="{{ book.title }}" class="w-full h-60 object-cover"> <!-- Changed height to h-40 -->
+                <div class="p-4 flex-grow flex flex-col">
+                    <h2 class="text-lg font-semibold mb-2">{{ book.title }}</h2>
+                    <p class="text-gray-600 mb-2 text-sm">{{ book.authors }}</p>
+                    <p class="text-xs text-gray-500 mb-4 flex-grow overflow-y-auto">{{ book.description|truncatechars:50 }}</p> <!-- Reduced truncatechars to 50 -->
+                    <form action="{% url 'make_request' book.title %}" method="POST" class="mt-auto">
+                        {% csrf_token %}
+                        <button type="submit" class="w-full text-white px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 shadow-lg rounded-lg hover:bg-gradient-to-r hover:from-purple-700 hover:to-indigo-700">
+                            Borrow
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        <div class="mt-8 flex justify-center">
+            <nav class="inline-flex rounded-md shadow">
+                {% if books.has_previous %}
+                    <a href="?page={{ books.previous_page_number }}{% if query %}&query={{ query }}{% endif %}" class="px-3 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        Previous
+                    </a>
+                {% endif %}
+                
+                <span class="px-3 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                    Page {{ books.number }} of {{ books.paginator.num_pages }}
+                </span>
+
+                {% if books.has_next %}
+                    <a href="?page={{ books.next_page_number }}{% if query %}&query={{ query }}{% endif %}" class="px-3 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+                        Next
+                    </a>
+                {% endif %}
+            </nav>
+        </div>
+
+        {% if message %}
+        <p class="text-red-500 mt-4">{{ message }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>
